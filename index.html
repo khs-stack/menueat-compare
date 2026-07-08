@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>메뉴잇 경쟁사 비교</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--M:#1A56FF;--M2:#EEF3FF;--bg:#F4F6FA;--t1:#1A202C;--t2:#4A5568;--t3:#A0AEC0;--bd:#E2E8F0;--or:#DD6B20;--ok:#38A169;--err:#E53E3E}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--t1);font-size:13px;padding-bottom:80px}
+
+/* 상단바 */
+.topbar{background:#1A202C;padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:100}
+.logo{color:#fff;font-weight:800;font-size:15px;display:flex;align-items:center;gap:7px}
+.logo-b{background:var(--M);border-radius:5px;padding:2px 8px;font-size:12px}
+.topbar-r{display:flex;gap:6px}
+.btn{border:none;border-radius:8px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-family:inherit;white-space:nowrap}
+.btn-blue{background:var(--M);color:#fff}
+.btn-ghost{background:rgba(255,255,255,.1);color:#CBD5E0}
+.btn-white{background:#fff;color:var(--t1);border:1px solid var(--bd)}
+.btn-green{background:var(--ok);color:#fff}
+.btn-sm{padding:5px 10px;font-size:11px;border-radius:6px}
+
+/* 하단 탭 */
+.tab-bar{position:fixed;bottom:0;left:0;right:0;background:#1A202C;display:flex;z-index:9999;border-top:1px solid #2D3748;height:64px}
+.tb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#4A5568;cursor:pointer;gap:3px;font-size:10px;font-weight:600;padding:8px 0;border:none;background:none;font-family:inherit}
+.tb i{font-size:22px}
+.tb.on{color:#60A5FA}
+
+/* 페이지 */
+.page{display:none;padding:14px 14px 16px}
+.page.on{display:block}
+
+/* 통계 카드 */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.sc{background:#fff;border-radius:10px;padding:13px 14px;border-left:3px solid var(--M)}
+.sc.red{border-color:var(--err)}.sc.orange{border-color:var(--or)}.sc.green{border-color:var(--ok)}
+.sc .sv{font-size:22px;font-weight:800}
+.sc .sl{font-size:11px;color:var(--t3);margin-top:2px}
+
+/* 필터 */
+.fbar{background:#fff;border-radius:10px;padding:10px 12px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px}
+.frow{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.fi{flex:1;min-width:100px;padding:7px 10px;border:1px solid var(--bd);border-radius:7px;font-size:12px;background:#fff;outline:none}
+.gchips{display:flex;gap:5px;flex-wrap:wrap}
+.gc{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid var(--bd);background:#fff;color:var(--t3)}
+.gc.on{color:#fff;border-color:currentColor}
+.gc.on.all{background:#1A202C;border-color:#1A202C}
+.gc.on.S{background:#7C3AED;border-color:#7C3AED}
+.gc.on.A{background:var(--or);border-color:var(--or)}
+.gc.on.B{background:#D69E2E;border-color:#D69E2E}
+.gc.on.C{background:#3182CE;border-color:#3182CE}
+.gc.on.D{background:#718096;border-color:#718096}
+
+/* 업체 카드 (모바일은 카드형) */
+.co-card{background:#fff;border-radius:10px;padding:13px 14px;margin-bottom:10px;border:1px solid var(--bd)}
+.co-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.co-name{font-weight:700;font-size:15px;flex:1}
+.grade{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;font-size:11px;font-weight:800}
+.gS{background:#7C3AED;color:#fff}.gA{background:var(--or);color:#fff}
+.gB{background:#D69E2E;color:#fff}.gC{background:#3182CE;color:#fff}.gD{background:#718096;color:#fff}
+.co-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.co-item{background:var(--bg);border-radius:7px;padding:7px 9px}
+.co-item .k{font-size:9px;color:var(--t3);font-weight:700;text-transform:uppercase;margin-bottom:2px}
+.co-item .v{font-size:12px;font-weight:600}
+.co-item .v.orange{color:var(--or)}
+.co-item .v.red{color:var(--err)}
+.co-item .v.green{color:var(--ok)}
+.co-actions{display:flex;gap:6px;margin-top:10px}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.tok{background:#C6F6D5;color:#276749}.tbad{background:#FED7D7;color:#9B2C2C}.twarn{background:#FEFCBF;color:#744210}
+.tneed{background:#E9D8FD;color:#553C9A}
+.updt-dot{width:7px;height:7px;border-radius:50%;background:var(--err);display:inline-block;margin-left:4px;vertical-align:middle;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* 비교 탭 */
+.banner{background:linear-gradient(135deg,#1A202C,#2D3748);border-radius:10px;padding:12px 14px;color:#fff;margin-bottom:12px}
+.banner h3{font-size:13px;font-weight:700;margin-bottom:4px}
+.banner p{font-size:11px;color:#718096}
+.cmp-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.chip{display:inline-flex;padding:5px 12px;border:1px solid var(--bd);border-radius:20px;font-size:12px;cursor:pointer;background:#fff}
+.chip.sel{background:var(--M2);border-color:var(--M);color:var(--M);font-weight:600}
+.cmp-card{background:#fff;border-radius:10px;padding:13px 14px;margin-bottom:10px;border:1px solid var(--bd)}
+.cmp-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #F0F4F8;font-size:12px}
+.cmp-row:last-child{border-bottom:none}
+.cmp-row .ck{color:var(--t3);font-size:11px}
+.cmp-row .cv{font-weight:600}
+.vsbox{margin-top:8px;padding:9px;border-radius:7px;font-size:11px;line-height:1.7}
+.vsbox.good{background:#F0FFF4;border:1px solid #9AE6B4}
+.vsbox.bad{background:#FFF5F5;border:1px solid #FEB2B2}
+.vsbox.mix{background:#FFFFF0;border:1px solid #FAF089}
+
+/* 전화상담 */
+.co-sel-list{background:#fff;border-radius:10px;margin-bottom:12px;overflow:hidden;border:1px solid var(--bd)}
+.co-sel-item{padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #F0F4F8;cursor:pointer}
+.co-sel-item:last-child{border-bottom:none}
+.co-sel-item.on{background:var(--M2);border-right:3px solid var(--M)}
+.cform{background:#fff;border-radius:10px;padding:14px;border:1px solid var(--bd)}
+.cform h3{font-size:13px;font-weight:700;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bd)}
+.crow{margin-bottom:10px}
+.crow .cq{font-size:12px;font-weight:600;color:var(--t2);margin-bottom:3px}
+.crow .cs{font-size:10px;color:var(--M);background:var(--M2);padding:4px 8px;border-radius:5px;margin-bottom:4px;font-style:italic}
+.cinput{width:100%;padding:8px 10px;border:1px solid var(--bd);border-radius:7px;font-size:12px;font-family:inherit;outline:none;background:#fff}
+.cinput:focus{border-color:var(--M)}
+.fcat-label{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;padding:8px 0 4px;letter-spacing:.4px}
+.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px}
+.fci{display:flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid var(--bd);border-radius:6px;font-size:11px;cursor:pointer;background:#fff}
+.fci input{accent-color:var(--M);width:14px;height:14px;flex-shrink:0;cursor:pointer}
+.fci.ck{border-color:var(--M);background:var(--M2);color:var(--M);font-weight:600}
+
+/* 대시보드 */
+.dash-card{background:#fff;border-radius:10px;padding:14px;margin-bottom:12px;border:1px solid var(--bd)}
+.dash-card h3{font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.rrow{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #F0F4F8;font-size:12px}
+.rrow:last-child{border-bottom:none}
+.rn{width:20px;height:20px;border-radius:50%;background:var(--bg);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--t3);flex-shrink:0}
+.rn.top{background:var(--or);color:#fff}
+.bm{flex:1;background:#EDF2F7;border-radius:4px;height:7px;overflow:hidden}
+.bmf{height:100%;border-radius:4px}
+.dl-btn{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.dl-btn .btn{width:100%;justify-content:center;padding:14px}
+
+/* 모달 */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:#fff;border-radius:16px 16px 0 0;width:100%;max-height:90vh;overflow-y:auto;padding:20px}
+.mh{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--bd)}
+.mh h2{font-size:15px;font-weight:700;flex:1}
+.mf{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--bd)}
+.fr{margin-bottom:10px}
+.fr label{display:block;font-size:10px;color:var(--t3);margin-bottom:3px;font-weight:700;text-transform:uppercase}
+.fr input,.fr textarea,.fr select{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff}
+.fr input:focus,.fr textarea:focus,.fr select:focus{border-color:var(--M)}
+.fr textarea{resize:vertical;min-height:60px}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.sec-lbl{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;margin:12px 0 7px;padding-bottom:4px;border-bottom:1px solid var(--bd)}
+
+/* AI */
+.ai-wrap{padding:14px}
+.ai-wrap textarea{width:100%;padding:10px;border:1px solid var(--bd);border-radius:8px;font-size:13px;min-height:80px;resize:vertical;font-family:inherit;outline:none;margin-bottom:8px}
+.air{font-size:12px;line-height:1.85;padding:12px;background:var(--bg);border-radius:8px;white-space:pre-wrap;display:none;margin-top:8px}
+.qb{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+
+/* 알림 */
+.alert-bar{padding:9px 14px;display:flex;align-items:center;gap:8px;font-size:12px;color:#fff}
+.alert-bar.warn{background:linear-gradient(90deg,#D69E2E,#C05621)}
+.alert-bar.info{background:linear-gradient(90deg,#2B6CB0,#2C7A7B)}
+.atag{background:rgba(255,255,255,.2);border-radius:20px;padding:2px 7px;font-size:10px;font-weight:700;flex-shrink:0}
+
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:80px;right:14px;left:14px;background:#1A202C;color:#fff;border-radius:10px;padding:12px 16px;font-size:13px;z-index:9999;text-align:center;transform:translateY(100px);opacity:0;transition:all .3s;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{background:#276749}.toast.err{background:#9B2C2C}
+.empty{text-align:center;padding:3rem 1rem;color:var(--t3);font-size:13px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo"><div class="logo-b">M</div>메뉴잇 경쟁사 비교</div>
+  <div class="topbar-r">
+    <button class="btn btn-ghost btn-sm" onclick="oAI()"><i class="ti ti-robot"></i></button>
+    <button class="btn btn-blue btn-sm" onclick="oAdd()"><i class="ti ti-plus"></i> 추가</button>
+  </div>
+</div>
+
+<div id="alertArea"></div>
+
+<!-- 페이지1: 목록 -->
+<div class="page on" id="page-list">
+  <div class="stat-grid" id="statCards"></div>
+  <div class="fbar">
+    <div class="frow">
+      <input class="fi" id="si" placeholder="업체명, 가격 검색..." oninput="render()">
+      <select class="fi" id="f판매" onchange="render()" style="flex:0;min-width:110px"><option value="">판매방식 전체</option><option>렌탈</option><option>할부구매</option><option>무약정</option></select>
+    </div>
+    <div class="gchips">
+      <div class="gc on all" onclick="setGF('all',this)">전체</div>
+      <div class="gc S" onclick="setGF('S',this)">S</div>
+      <div class="gc A" onclick="setGF('A',this)">A</div>
+      <div class="gc B" onclick="setGF('B',this)">B</div>
+      <div class="gc C" onclick="setGF('C',this)">C</div>
+      <div class="gc D" onclick="setGF('D',this)">D</div>
+    </div>
+  </div>
+  <div id="coList"></div>
+  <div style="font-size:11px;color:var(--t3);text-align:center;margin-top:4px" id="cnt"></div>
+</div>
+
+<!-- 페이지2: 비교 -->
+<div class="page" id="page-compare">
+  <div class="banner">
+    <h3>메뉴잇 기준 경쟁사 비교</h3>
+    <p>자체렌탈 · 해지 25% · 연동포스 실시간+에이전트20개이상 · VAN(KICC/KIS/NICE)</p>
+  </div>
+  <p style="font-size:11px;color:var(--t3);margin-bottom:8px">비교할 업체 선택 (최대 4개)</p>
+  <div class="cmp-chips" id="cmpChips"></div>
+  <div id="cmpCards"></div>
+</div>
+
+<!-- 페이지3: 전화상담 -->
+<div class="page" id="page-call">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div>
+      <h2 style="font-size:15px;font-weight:700">전화상담 입력</h2>
+      <p style="font-size:11px;color:var(--t3)">업체 선택 → 답변 입력 → 저장</p>
+    </div>
+    <button class="btn btn-green btn-sm" onclick="saveCall()"><i class="ti ti-device-floppy"></i> 저장</button>
+  </div>
+  <div class="co-sel-list" id="callList"></div>
+  <div id="callForm"></div>
+</div>
+
+<!-- 페이지4: 대시보드/다운로드 -->
+<div class="page" id="page-dash">
+  <div class="dash-card">
+    <h3><i class="ti ti-download" style="color:var(--M)"></i> 다운로드</h3>
+    <div class="dl-btn">
+      <button class="btn btn-blue" onclick="dlExcel()"><i class="ti ti-file-spreadsheet"></i> 엑셀 다운로드 (원본 양식 5시트)</button>
+      <button class="btn btn-white" onclick="dlPDF()"><i class="ti ti-file-type-pdf" style="color:var(--or)"></i> PDF 보고서</button>
+    </div>
+  </div>
+  <div class="dash-card">
+    <h3><i class="ti ti-chart-bar" style="color:var(--M)"></i> 가격 순위 (후불형)</h3>
+    <div id="priceRank"></div>
+  </div>
+  <div class="dash-card">
+    <h3><i class="ti ti-alert-triangle" style="color:var(--err)"></i> 영업 위협도</h3>
+    <div id="threatMeter"></div>
+  </div>
+  <div class="dash-card">
+    <h3><i class="ti ti-message" style="color:var(--or)"></i> 경쟁사별 대응 멘트</h3>
+    <div id="mentBox"></div>
+  </div>
+</div>
+
+<!-- 하단 탭 -->
+<div class="tab-bar">
+  <button class="tb on" id="tb0" onclick="goTab(0)"><i class="ti ti-list"></i>목록</button>
+  <button class="tb" id="tb1" onclick="goTab(1)"><i class="ti ti-columns"></i>비교</button>
+  <button class="tb" id="tb2" onclick="goTab(2)"><i class="ti ti-phone-call"></i>전화상담</button>
+  <button class="tb" id="tb3" onclick="goTab(3)"><i class="ti ti-download"></i>다운로드</button>
+</div>
+
+<!-- AI 모달 -->
+<div id="mAI" style="display:none" class="mbg" onclick="if(event.target===this)cl('mAI')">
+<div class="modal">
+  <div class="mh"><i class="ti ti-robot" style="color:var(--M)"></i><h2>AI 경쟁사 분석</h2><button class="btn btn-white btn-sm" onclick="cl('mAI')">닫기</button></div>
+  <div class="ai-wrap">
+    <textarea id="aq" placeholder="예) 히엘페이 가격? / 메뉴잇 강점? / 위약금 유리한 업체?"></textarea>
+    <button class="btn btn-blue" id="aibtn" onclick="runAI()" style="width:100%"><i class="ti ti-send"></i> 분석 시작</button>
+    <div id="ar" class="air"></div>
+  </div>
+  <div class="qb">
+    <button class="btn btn-white btn-sm" onclick="sq('후불형 가격 저렴한 순서')">💰 가격순위</button>
+    <button class="btn btn-white btn-sm" onclick="sq('메뉴잇 대비 경쟁사 강약점')">🏆 메뉴잇 우위</button>
+    <button class="btn btn-white btn-sm" onclick="sq('티오더 고객 전환 설득 멘트')">💬 설득멘트</button>
+    <button class="btn btn-white btn-sm" onclick="sq('위협도 높은 업체 대응 전략')">🎯 위협대응</button>
+  </div>
+</div></div>
+
+<!-- 업체 추가/수정 모달 -->
+<div id="mAdd" style="display:none" class="mbg" onclick="if(event.target===this)cl('mAdd')">
+<div class="modal">
+  <div class="mh"><i class="ti ti-building-store" style="color:var(--M)"></i><h2 id="mAddT">업체 추가</h2><button class="btn btn-white btn-sm" onclick="cl('mAdd')">취소</button></div>
+  <input type="hidden" id="eid">
+  <div class="fg2">
+    <div class="fr"><label>업체명 *</label><input id="fc"></div>
+    <div class="fr"><label>등급</label><select id="fg"><option value="S">S</option><option value="A">A</option><option value="B" selected>B</option><option value="C">C</option><option value="D">D</option></select></div>
+  </div>
+  <div class="fg2">
+    <div class="fr"><label>판매방식</label><input id="f판매방식" placeholder="할부구매, 렌탈, 무약정"></div>
+    <div class="fr"><label>약정</label><input id="f약정" placeholder="3년, 무약정"></div>
+  </div>
+  <div class="fg2">
+    <div class="fr"><label>후불형</label><input id="f후불형" placeholder="19,000원"></div>
+    <div class="fr"><label>선불형</label><input id="f선불형" placeholder="21,000원"></div>
+  </div>
+  <div class="fg2">
+    <div class="fr"><label>해지위약금</label><input id="f해지" placeholder="위약금 100%"></div>
+    <div class="fr"><label>AS</label><input id="fAS" placeholder="파손 불가"></div>
+  </div>
+  <div class="fg2">
+    <div class="fr"><label>콜센터</label><input id="f콜센터" placeholder="연중무휴 새벽2시"></div>
+    <div class="fr"><label>확인날짜</label><input id="f확인날짜" placeholder="2026.7.3"></div>
+  </div>
+  <div class="fr"><label>프로모션</label><textarea id="f프로모션"></textarea></div>
+  <div class="fr"><label>메모</label><textarea id="fmemo"></textarea></div>
+  <div class="mf">
+    <button class="btn btn-white" style="flex:1" onclick="cl('mAdd')">취소</button>
+    <button class="btn btn-blue" style="flex:2" onclick="saveD()"><i class="ti ti-device-floppy"></i> 저장</button>
+  </div>
+</div></div>
+
+<!-- 상세 모달 -->
+<div id="mDet" style="display:none" class="mbg" onclick="if(event.target===this)cl('mDet')">
+<div class="modal" id="mDetBody"></div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const LK = 'menueat_v8';
+let D = [], GF = 'all', callId = null, CmpSel = [];
+
+const FEAT_CATS = {
+  '결제/포스': ['자리이동','합석','영수증 재출력','배달 연동','듀얼모니터','더치페이','애플페이','카카오페이','제로페이','서비스 적용','할인 적용'],
+  '관리/운영': ['ASP','로봇연동','뷰가드 연동','오더포스 모드','KDS 모드','예약석','웨이팅','포인트','후불형/선불형 변경','전원 off','화면켜기','원격 재부팅','원격 업데이트'],
+  '메뉴관리': ['메뉴 사진수정','메뉴 금액 수정','판매시간 설정','품절','숨김','옵션','맵기표시','신메뉴 표시','로고 변경','대기페이지 변경'],
+  '부가기능': ['공지기능','테마 변경','다국어','픽업메세지','채팅','게임','브레이크','영업마감','전자영수증','배리어프리','태블릿 배터리 잔여표시']
+};
+
+const MENT = {
+  '티오더':'매출 -26%(2025), 경영권 매각 추진 → "시스템 안정성 괜찮을까요?" / 위약금 100% → "메뉴잇은 25%"',
+  '캡스':'동일 플랫폼 별도 채널 → 메뉴잇 직영 직접상담 강점',
+  '하이오더':'KT 결합 강점 → "하지만 파손AS 불가, 콜센터 새벽2시까지만"',
+  '히엘페이':'후불 11,000원 저가 → "히엘페이 전용VAN만, 기존 POS 사용 불가"',
+  '페이히어':'24시간 콜센터 → "파손AS 불가, 오케이포스·유니온포스만 연동"',
+  '업오더':'저가 13,000원 → "아임유POS 연동만, 콜센터 오전9~오후6시"',
+  '이지포스':'저가 11,000원 → "연동 포스 없음, 콜센터 오후6시 마감"'
+};
+
+const EXCEL_DATA = [{"id": "캡스", "c": "캡스", "grade": "A", "위협도": 80, "확인날짜": "2026.7.3", "판매방식": "자체렌탈", "마케팅전략": "SK쉴더스 인프라  24시간 고객센터  기존 포스 연동", "프로모션": "견적·공사비 무료  무료 웨이팅  무료 메뉴 촬영  무상 AS", "태블릿": "", "거치대색": "", "약정": "", "재약정": "", "소유권": "", "해지": "", "포스비용": "", "후불형": "", "선불형": "", "DID": "", "프린터": "", "서빙로봇": "", "인터넷": "", "AS": "파손 불가", "콜센터": "24시간 고객센터", "감열지": "", "광고": "", "자사포스": "메뉴잇 포스", "VAN": "KICC , KIS , NICE", "연동포스": "실시간 연동 :이지포스,오케이포스 \n\n\n에이젼트 연동 방식 (20개이상)", "features": {"자리이동": "가능", "합석": "가능", "영수증 재출력": "가능", "배달 연동": "푸드테크 추가", "듀얼모니터": "X", "더치페이": "가능", "애플페이": "선불형 불가", "카카오페이": "메뉴잇 포스 불가", "제로페이": "메뉴잇 포스 불가", "서비스 적용": "가능", "할인 적용": "가능", "재판매": "가능", "메뉴별 프린터 선택 출력": "가능", "분할출력": "가능", "테이블 선택 출력": "가능", "테이블 배치도 설정": "가능", "네이버 영수증 리뷰": "X", "출력매수": "가능", "통화 변경": "가능", "부가세 설정": "가능", "부가세 별도": "가능", "봉사료률": "가능", "ASP": "웹 연동", "휴대폰 수정": "가능", "로봇연동": "배민", "뷰가드 연동": "캡스", "도난방지 알림 팝업": "가능", "메뉴판 테이블 번호 변경": "가능", "오더포스 모드": "가능", "KDS 모드": "가능", "예약석": "X", "웨이팅": "가능(무상)", "포인트": "가능", "주문완료 총금액 노출 여부": "가능", "후불형 / 선불형 변경": "가능", "전원 on": "X", "전원 off": "가능", "화면켜기": "가능", "원격 화면끄기": "가능", "원격 재부팅": "가능", "원격 업데이트": "가능", "메뉴 사진수정": "가능", "메뉴 금액 수정": "가능", "판매시간 설정": "가능", "품절": "가능", "숨김": "가능", "옵션": "가능", "최소주문수량": "가능", "맵기표시": "가능", "신메뉴 표시": "가능", "프린터 출력 메뉴명": "가능", "로고 변경": "가능", "대기페이지 변경": "가능", "주문완료 페이지 변경": "가능", "대기페이지 영상": "가능", "공지기능": "X", "테마 변경": "화이트 / 블랙", "UI변경": "가능", "다국어": "한국어 , 중국어 , 일본어 , 영어", "픽업메세지": "가능", "기프티콘 사용": "X", "QR코드 노출 기능": "X", "채팅": "X", "게임": "X", "경매": "X", "브레이크": "가능", "영업마감": "가능", "스마트워치": "X", "객수": "가능", "전자영수증": "X", "옵션 사진 삽입 기능": "X", "할인표시 기능": "X", "배리어프리 기능": "X", "태블릿 배터리 잔여표시": "가능"}, "기능수": 74, "callLog": "", "callDate": "", "memo": "", "updAlerted": false}, {"id": "티오더", "c": "티오더", "grade": "S", "위협도": 92, "확인날짜": "2026.7.3", "판매방식": "할부구매", "마케팅전략": "글로벌 1위 이미지메이킹 유지  AI 메뉴 수정 홍보", "프로모션": "사이다 스포트라이트 36개 판매 시 4,000원 할인  담당자 배정 후 정확 정책", "태블릿": "", "거치대색": "", "약정": "3년", "재약정": "프로그램 사용비 대당 12,900원", "소유권": "소유권 이전", "해지": "위약금 100%", "포스비용": "무상", "후불형": "19,000원", "선불형": "21,000원", "DID": "", "프린터": "", "서빙로봇": "", "인터넷": "", "AS": "파손 불가", "콜센터": "연중무휴  새벽 2시까지 운영", "감열지": "", "광고": "", "자사포스": "X", "VAN": "VAN  KSNET·KIS·나이스페이먼츠·KOVAN·SMARTRO·NHNKCP·KOCES·NICE·KICC 등", "연동포스": "오케이포스·토스 무상  다수 POS 연동(PDF 참조)", "features": {"자리이동": "연동 포스 확인필요", "합석": "연동 포스 확인필요", "영수증 재출력": "연동 포스 확인필요", "배달 연동": "연동 포스 확인필요", "듀얼모니터": "연동 포스 확인필요", "더치페이": "연동 포스 확인필요", "애플페이": "선불형 불가", "카카오페이": "선불형 불가", "제로페이": "선불형 불가", "서비스 적용": "연동 포스 확인필요", "할인 적용": "연동 포스 확인필요", "재판매": "연동 포스 확인필요", "메뉴별 프린터 선택 출력": "연동 포스 확인필요", "분할출력": "연동 포스 확인필요", "테이블 선택 출력": "연동 포스 확인필요", "테이블 배치도 설정": "연동 포스 확인필요", "네이버 영수증 리뷰": "연동 포스 확인필요", "출력매수": "연동 포스 확인필요", "통화 변경": "연동 포스 확인필요", "부가세 설정": "연동 포스 확인필요", "부가세 별도": "연동 포스 확인필요", "봉사료률": "연동 포스 확인필요", "ASP": "X", "휴대폰 수정": "X", "로봇연동": "LG클로이", "뷰가드 연동": "X", "도난방지 알림 팝업": "X", "메뉴판 테이블 번호 변경": "가능", "오더포스 모드": "태블릿 불가 , 연동 포스 가능", "KDS 모드": "가능", "웨이팅": "가능", "포인트": "X", "주문완료 총금액 노출 여부": "X", "후불형 / 선불형 변경": "X", "메뉴 사진수정": "고객센터 AI 통한 수정 진행", "품절": "가능", "숨김": "가능", "프린터 출력 메뉴명": "X", "로고 변경": "X", "테마 변경": "커스텀 테마 기능 (배경 색상 변경 , 배경 패턴 변경)", "UI변경": "X", "픽업메세지": "가능", "기프티콘 사용": "X", "채팅": "가능", "게임": "가능", "경매": "가능", "브레이크": "가능", "영업마감": "가능", "스마트워치": "X", "객수": "개수", "할인표시 기능": "가능", "배리어프리 기능": "불가능"}, "기능수": 52, "callLog": "", "callDate": "", "memo": "", "updAlerted": false}, {"id": "하이오더", "c": "하이오더", "grade": "A", "위협도": 75, "확인날짜": "2026.7.3", "판매방식": "할부구매", "마케팅전략": "KT 인터넷 결합 할인  선불형 강조", "프로모션": "지원금 대당 10만원  인터넷 결합 시 할인", "태블릿": "", "거치대색": "", "약정": "3년", "재약정": "프로그램 사용비 대당 15,900원", "소유권": "소유권 이전", "해지": "위약금: 설치비 + 프로모션 할인금액 + 잔여 약정기간 총 이용료 50%(잔여 단말대금 별도 청구)", "포스비용": "", "후불형": "20,000원", "선불형": "22,000원", "DID": "", "프린터": "", "서빙로봇": "", "인터넷": "KT 인터넷 제휴 시 인터넷 사용료 전액 무상 지원(상담 통해 확인)", "AS": "파손 불가", "콜센터": "오전 9시~새벽 2시", "감열지": "", "광고": "", "자사포스": "X", "VAN": "", "연동포스": "모든 포스 연동", "features": {"자리이동": "가능", "합석": "가능", "영수증 재출력": "가능", "배달 연동": "가능", "듀얼모니터": "가능", "더치페이": "가능", "애플페이": "가능", "카카오페이": "가능", "제로페이": "가능", "서비스 적용": "가능", "할인 적용": "가능", "재판매": "가능", "테이블 배치도 설정": "보완예정", "네이버 영수증 리뷰": "가능", "출력매수": "가능", "통화 변경": "가능", "부가세 설정": "가능", "부가세 별도": "가능", "봉사료률": "가능", "ASP": "가능", "휴대폰 수정": "가능", "뷰가드 연동": "X", "도난방지 알림 팝업": "X", "메뉴판 테이블 번호 변경": "가능", "KDS 모드": "가능", "예약석": "가능", "포인트": "가능", "메뉴 사진수정": "가능 여부 확인 필요", "메뉴 금액 수정": "가능", "품절": "가능", "숨김": "가능", "옵션": "가능", "맵기표시": "가능", "신메뉴 표시": "가능", "대기페이지 변경": "가능", "공지기능": "가능", "테마 변경": "2가지 변경(다크모드 , 화이트모드)", "UI변경": "가능", "다국어": "가능", "픽업메세지": "가능"}, "기능수": 40, "callLog": "", "callDate": "", "memo": "", "updAlerted": false}, {"id": "히엘페이", "c": "히엘페이", "grade": "A", "위협도": 70, "확인날짜": "2026.7.3", "판매방식": "할부구매", "마케팅전략": "결제 전문기업 포지셔닝", "프로모션": "가격 인하", "태블릿": "", "거치대색": "", "약정": "3년", "재약정": "관리 비용 6,500~8,500원(50% 가격)  프로그램 사용비 없음", "소유권": "소유권 이전", "해지": "", "포스비용": "", "후불형": "11,000원", "선불형": "13,000원", "DID": "", "프린터": "", "서빙로봇": "", "인터넷": "포스-태블릿 메인서버 연동  1·2층 등 넓은 매장도 공유기 다수 사용 가능", "AS": "파손 불가", "콜센터": "365일 연중무휴 07~22시", "감열지": "", "광고": "", "자사포스": "", "VAN": "VAN 기반  히엘페이만 사용 가능", "연동포스": "히엘페이만 사용 가능", "features": {"전원 on": "가능", "전원 off": "가능", "판매시간 설정": "가능", "테마 변경": "다크 , 라이트", "다국어": "한국어 , 중국어 , 일본어 , 영어", "전자영수증": "가능"}, "기능수": 6, "callLog": "", "callDate": "", "memo": "", "updAlerted": false}, {"id": "페이히어", "c": "페이히어", "grade": "B", "위협도": 58, "확인날짜": "2026.7.3", "판매방식": "할부구매", "마케팅전략": "수수료 0원  24시간 고객센터  네이버·당근 연동", "프로모션": "최대 50% 이용료 할인  KDS 12개월 구독권 이벤트", "태블릿": "", "거치대색": "블랙, 화이트", "약정": "3년", "재약정": "프로그램 사용비 대당 10,300원", "소유권": "소유권 이전", "해지": "", "포스비용": "38,500원", "후불형": "15,900원", "선불형": "19,500원", "DID": "", "프린터": "", "서빙로봇": "", "인터넷": "", "AS": "파손 불가", "콜센터": "365일 연중무휴 24시간", "감열지": "", "광고": "", "자사포스": "", "VAN": "", "연동포스": "후불형: 오케이포스·유니온포스  선불형: 페이히어 필수", "features": {"예약석": "가능", "웨이팅": "가능", "판매시간 설정": "가능", "공지기능": "가능", "테마 변경": "18종 테마", "다국어": "한국어 , 중국어 , 일본어 , 영어", "태블릿 배터리 잔여표시": "가능"}, "기능수": 7, "callLog": "", "callDate": "", "memo": "", "updAlerted": false}, {"id": "메이트", "c": "메이트", "grade": "B", "위협도": 45, "확인날짜": "2026.7.3", "판매방식": "", "마케팅전략": "546+개 브랜드 도입  90개 이상 배달대행사 연동", "프로모션": "", "태블릿": "", "거치대색": "", "약정": "", "재약정": "", "소유권": "", "해지": "", "포스비용": "", "후불형": "", "선불형": "", "DID": "", "프린터": "", "서빙로봇": "", "인터넷": "", "AS": "파손 불가", "콜센터": "연중무휴 고객센터 10:00~23:00", "감열지": "", "광고": "", "자사포스": "", "VAN": "", "연동포스": "", "features": {}, "기능수": 0, "callLog": "", "callDate": "", "memo": "", "updAlerted": false}, {"id": "비버매장연구소", "c": "비버매장연구소", "grade": "B", "위협도": 42, "확인날짜": "2026.7.3", "판매방식": "", "마케팅전략": "스마트매장 통합 솔루션  365일 24시간 CS", "프로모션": "무약정 테이블오더 출시  포스 결합 시 렌탈비 10% 할인", "태블릿": "EI-101FS", "거치대색": "", "약정": "무약정", "재약정": "", "소유권": "", "해지": "", "포스비용": "", "후불형": "", "선불형": "", "DID": "비버 DID 고객호출 서비스 보유", "프린터": "KDS·주방 연동 솔루션 보유", "서빙로봇": "서빙로봇 솔루션 보유", "인터넷": "", "AS": "", "콜센터": "365일 24시간 CS", "감열지": "", "광고": "", "자사포스": "", "VAN": "", "연동포스": "", "features": {}, "기능수": 0, "callLog": "", "callDate": "", "memo": "", "updAlerted": false}, {"id": "업오더", "c": "업오더", "grade": "B", "위협도": 65, "확인날짜": "2026.7.3", "판매방식": "할부구매", "마케팅전략": "저가형 가격 경쟁  아임유POS 연동", "프로모션": "", "태블릿": "Octa-Core 8코어", "거치대색": "", "약정": "3년", "재약정": "프로그램 사용비 대당 1,000원", "소유권": "소유권 이전", "해지": "위약금 100%", "포스비용": "", "후불형": "13,000원", "선불형": "", "DID": "", "프린터": "주방프린터 연동 가능(UP오더 매뉴얼솔루션 기준)", "서빙로봇": "", "인터넷": "", "AS": "파손 불가  소모품 6개월(보조배터리)", "콜센터": "오전 9시~오후 6시", "감열지": "", "광고": "", "자사포스": "", "VAN": "", "연동포스": "", "features": {}, "기능수": 0, "callLog": "", "callDate": "", "memo": "", "updAlerted": false}, {"id": "이지포스", "c": "이지포스", "grade": "B", "위협도": 65, "확인날짜": "2026.7.3", "판매방식": "할부구매", "마케팅전략": "저가형 가격 경쟁  이지포스 연동", "프로모션": "", "태블릿": "CS-124A", "거치대색": "", "약정": "3년", "재약정": "프로그램 사용비 대당 1,000원", "소유권": "소유권 이전", "해지": "위약금 100%", "포스비용": "", "후불형": "11,000원", "선불형": "", "DID": "", "프린터": "", "서빙로봇": "", "인터넷": "", "AS": "파손 불가  소모품 6개월(보조배터리)", "콜센터": "오전 9시~오후 6시", "감열지": "", "광고": "", "자사포스": "", "VAN": "", "연동포스": "", "features": {}, "기능수": 0, "callLog": "", "callDate": "", "memo": "", "updAlerted": false}, {"id": "나이스(플러스오더)", "c": "나이스(플러스오더)", "grade": "B", "위협도": 62, "확인날짜": "2026.7.3", "판매방식": "할부구매", "마케팅전략": "NICE 직접 개발  관리자태블릿 강조", "프로모션": "", "태블릿": "NTP-10", "거치대색": "", "약정": "3년", "재약정": "프로그램 사용비 대당 1,000원", "소유권": "소유권 이전", "해지": "위약금 100%", "포스비용": "", "후불형": "11,000원", "선불형": "", "DID": "", "프린터": "주방 출력·관리자태블릿 주문확인", "서빙로봇": "", "인터넷": "", "AS": "파손 불가  소모품 6개월(보조배터리)", "콜센터": "오전 9시~오후 6시", "감열지": "", "광고": "", "자사포스": "", "VAN": "", "연동포스": "", "features": {}, "기능수": 0, "callLog": "", "callDate": "", "memo": "", "updAlerted": false}, {"id": "유니온오더", "c": "유니온오더", "grade": "C", "위협도": 40, "확인날짜": "2026.7.3", "판매방식": "할부구매", "마케팅전략": "무약정·렌탈 강조", "프로모션": "무약정", "태블릿": "", "거치대색": "", "약정": "무약정", "재약정": "매출에 따라 금액 인하", "소유권": "반납", "해지": "위약금 없음  3년 이내 장비 철거비 33만원", "포스비용": "", "후불형": "15,000원", "선불형": "17,000원", "DID": "", "프린터": "주문내용 확인용 알림판 1대 이상 필수", "서빙로봇": "", "인터넷": "와이파이 AP 무상 제공", "AS": "파손 불가", "콜센터": "평일 09~22시  토 09~22시  일·공휴일 10~19시", "감열지": "", "광고": "", "자사포스": "", "VAN": "", "연동포스": "", "features": {}, "기능수": 0, "callLog": "", "callDate": "", "memo": "", "updAlerted": false}, {"id": "요기오더", "c": "요기오더", "grade": "B", "위협도": 60, "확인날짜": "2026.7.3", "판매방식": "할부구매 , 임대환급형", "마케팅전략": "마케팅·통신·세무·체험단 패키지 혜택", "프로모션": "", "태블릿": "", "거치대색": "", "약정": "3년", "재약정": "프로그램 사용비 대당 8,000원", "소유권": "구매형환급형 조건별 상이", "해지": "환급형: 1년 40%, 2년 30%, 3년 20%, 4년 만기 100% 환급", "포스비용": "", "후불형": "18,000원", "선불형": "20,000원", "DID": "", "프린터": "", "서빙로봇": "", "인터넷": "", "AS": "파손 불가", "콜센터": "09~21시  주말 당직 소통", "감열지": "", "광고": "", "자사포스": "", "VAN": "", "연동포스": "", "features": {}, "기능수": 0, "callLog": "", "callDate": "", "memo": "", "updAlerted": false}, {"id": "메뉴톡", "c": "메뉴톡", "grade": "C", "위협도": 30, "확인날짜": "2026.7.3", "판매방식": "할부구매", "마케팅전략": "", "프로모션": "", "태블릿": "", "거치대색": "", "약정": "3년", "재약정": "프로그램 사용비 대당 8,800원  타사 프로그램 사용 12,000원", "소유권": "소유권 이전", "해지": "위약금 100%", "포스비용": "", "후불형": "27,000원", "선불형": "30,500원", "DID": "", "프린터": "", "서빙로봇": "KT와 AI 서빙로봇 공동개발 MOU 기사 확인", "인터넷": "", "AS": "파손 불가", "콜센터": "365일 10~19시  주말·공휴일 10~18시", "감열지": "", "광고": "", "자사포스": "", "VAN": "", "연동포스": "", "features": {}, "기능수": 0, "callLog": "", "callDate": "", "memo": "", "updAlerted": false}, {"id": "먼키오더", "c": "먼키오더", "grade": "D", "위협도": 15, "확인날짜": "2026.7.3", "판매방식": "무약정", "마케팅전략": "무약정  AI 대시보드·쿠폰 발송 강조", "프로모션": "무약정", "태블릿": "", "거치대색": "", "약정": "무약정", "재약정": "", "소유권": "", "해지": "", "포스비용": "", "후불형": "", "선불형": "", "DID": "", "프린터": "", "서빙로봇": "", "인터넷": "", "AS": "", "콜센터": "", "감열지": "", "광고": "", "자사포스": "", "VAN": "", "연동포스": "", "features": {}, "기능수": 0, "callLog": "", "callDate": "", "memo": "", "updAlerted": false}, {"id": "킹오더브라더스", "c": "킹오더브라더스", "grade": "D", "위협도": 15, "확인날짜": "2026.7.3", "판매방식": "", "마케팅전략": "POS·키오스크·QR·KDS 통합 강조", "프로모션": "", "태블릿": "", "거치대색": "", "약정": "", "재약정": "", "소유권": "", "해지": "", "포스비용": "", "후불형": "", "선불형": "", "DID": "", "프린터": "", "서빙로봇": "", "인터넷": "", "AS": "", "콜센터": "", "감열지": "", "광고": "", "자사포스": "", "VAN": "", "연동포스": "", "features": {}, "기능수": 0, "callLog": "", "callDate": "", "memo": "", "updAlerted": false}, {"id": "패스트오더", "c": "패스트오더", "grade": "D", "위협도": 15, "확인날짜": "2026.7.3", "판매방식": "", "마케팅전략": "전국 물류망 신속 설치  SK·LG 협력  직원 동선 감소·주문 실수 예방·인건비 절감", "프로모션": "", "태블릿": "", "거치대색": "", "약정": "", "재약정": "", "소유권": "", "해지": "", "포스비용": "", "후불형": "", "선불형": "", "DID": "", "프린터": "", "서빙로봇": "", "인터넷": "", "AS": "", "콜센터": "", "감열지": "", "광고": "", "자사포스": "", "VAN": "", "연동포스": "", "features": {}, "기능수": 0, "callLog": "", "callDate": "", "memo": "", "updAlerted": false}];
+
+
+function needsRenew(d) {
+  if (!d.확인날짜) return true;
+  var p = String(d.확인날짜).split('.');
+  if (p.length < 3) return false;
+  var dt = new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]));
+  return (Date.now() - dt.getTime()) / (1000*60*60*24) > 30;
+}
+
+function init() {
+  var saved = localStorage.getItem(LK);
+  if (saved) {
+    try { D = JSON.parse(saved); } catch(e) { D = null; }
+  }
+  if (!D || !D.length) {
+    D = EXCEL_DATA.map(function(d) {
+      return Object.assign({}, d, {callLog:'', callDate:'', memo:''});
+    });
+  }
+  showAlerts();
+  render();
+  renderStat();
+  renderCallList();
+  renderDash();
+  renderCmpChips();
+}
+function sv() { localStorage.setItem(LK, JSON.stringify(D)); }
+
+function showAlerts() {
+  var promo = D.filter(function(d){ return d.프로모션 && d.프로모션.indexOf('예정') >= 0; });
+  var html = '';
+  if (promo.length) {
+    html += '<div class="alert-bar warn"><span class="atag">⚠️ 프로모션 변경 예정</span>' + promo.map(function(d){return d.c;}).join(', ') + '</div>';
+  }
+  var el = document.getElementById('alertArea');
+  el.innerHTML = html;
+}
+
+var PAGES = ['list','compare','call','dash'];
+function goTab(idx) {
+  document.querySelectorAll('.tb').forEach(function(t){ t.classList.remove('on'); });
+  document.getElementById('tb'+idx).classList.add('on');
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('on'); });
+  document.getElementById('page-'+PAGES[idx]).classList.add('on');
+  window.scrollTo(0,0);
+  if (idx === 1) renderCmpCards();
+  if (idx === 2) renderCallList();
+  if (idx === 3) renderDash();
+}
+
+function gBadge(g) {
+  return '<span class="grade g'+g+'">'+g+'</span>';
+}
+function gPrice(s) { return parseInt((s||'').replace(/[^0-9]/g,'')) || 0; }
+function vsBadge(d) {
+  var g=0, b=0, p=gPrice(d.후불형);
+  if (p>0 && p<15000) b++; else if (p>17000) g++;
+  if (d.해지 && d.해지.indexOf('100%') >= 0) g++;
+  if (b>g) return '<span class="tag tbad">주의 '+b+'건</span>';
+  if (g>b) return '<span class="tag tok">유리 '+g+'건</span>';
+  return '<span class="tag twarn">혼합</span>';
+}
+
+var GFilter = 'all';
+function setGF(g, el) {
+  GFilter = g;
+  document.querySelectorAll('.gc').forEach(function(c){ c.classList.remove('on'); });
+  el.classList.add('on');
+  render();
+}
+
+function render() {
+  var q = (document.getElementById('si')||{value:''}).value.toLowerCase();
+  var fp = document.getElementById('f판매').value;
+  var F = D.filter(function(d) {
+    var t = (d.c + (d.후불형||'') + (d.프로모션||'') + (d.memo||'')).toLowerCase();
+    return (!q || t.indexOf(q) >= 0) && (!fp || d.판매방식 === fp) && (GFilter === 'all' || d.grade === GFilter);
+  });
+  var el = document.getElementById('coList');
+  if (!F.length) { el.innerHTML = '<div class="empty">검색 결과 없음</div>'; document.getElementById('cnt').textContent=''; return; }
+  el.innerHTML = F.map(function(d) {
+    var fc = d.기능수 || Object.keys(d.features||{}).length;
+    return '<div class="co-card">'
+      + '<div class="co-head">' + gBadge(d.grade) + '<div class="co-name">' + d.c + (needsRenew(d)?'<span class="updt-dot"></span>':'') + '</div>' + vsBadge(d) + '</div>'
+      + '<div class="co-grid">'
+      + '<div class="co-item"><div class="k">후불형</div><div class="v orange">' + (d.후불형||'-') + '</div></div>'
+      + '<div class="co-item"><div class="k">선불형</div><div class="v">' + (d.선불형||'-') + '</div></div>'
+      + '<div class="co-item"><div class="k">해지위약금</div><div class="v' + (d.해지&&d.해지.indexOf('100%')>=0?' red':'') + '">' + ((d.해지||'-').substring(0,14)) + '</div></div>'
+      + '<div class="co-item"><div class="k">AS</div><div class="v">' + (d.AS||'-') + '</div></div>'
+      + '<div class="co-item"><div class="k">콜센터</div><div class="v">' + ((d.콜센터||'-').substring(0,14)) + '</div></div>'
+      + '<div class="co-item"><div class="k">기능수</div><div class="v">' + fc + '개</div></div>'
+      + '</div>'
+      + '<div class="co-actions">'
+      + '<button class="btn btn-white btn-sm" style="flex:1" data-id="' + d.id + '" onclick="oDet(this.dataset.id)"><i class="ti ti-eye"></i> 상세</button>'
+      + '<button class="btn btn-white btn-sm" data-id="' + d.id + '" onclick="oEdit(this.dataset.id)"><i class="ti ti-edit"></i></button>'
+      + '<button class="btn btn-white btn-sm" style="color:var(--err)" data-id="' + d.id + '" onclick="delD(this.dataset.id)"><i class="ti ti-trash"></i></button>'
+      + '</div></div>';
+  }).join('');
+  document.getElementById('cnt').textContent = F.length + '/' + D.length + '개 업체';
+}
+
+function renderStat() {
+  var SA = D.filter(function(d){ return d.grade==='S'||d.grade==='A'; }).length;
+  var renew = D.filter(needsRenew).length;
+  var prices = D.filter(function(d){ return d.후불형&&gPrice(d.후불형)>0; }).map(function(d){ return gPrice(d.후불형); });
+  var avg = prices.length ? Math.round(prices.reduce(function(a,b){return a+b;})/prices.length) : 0;
+  document.getElementById('statCards').innerHTML = [
+    {v:D.length+'개', l:'등록 업체', cls:''},
+    {v:SA+'개', l:'S·A등급 핵심', cls:'red'},
+    {v:(avg/1000).toFixed(1)+'만원', l:'평균 후불형', cls:'orange'},
+    {v:D.filter(function(d){return d.callDate;}).length+'/'+D.length, l:'상담 완료', cls:'green'},
+  ].map(function(s){ return '<div class="sc '+s.cls+'"><div class="sv">'+s.v+'</div><div class="sl">'+s.l+'</div></div>'; }).join('');
+}
+
+// 비교
+function renderCmpChips() {
+  document.getElementById('cmpChips').innerHTML = D.map(function(d){
+    return '<span class="chip'+(CmpSel.indexOf(d.id)>=0?' sel':'')+'" data-id="'+d.id+'" onclick="togCmp(this.dataset.id)">'+d.c+'</span>';
+  }).join('');
+}
+function togCmp(id) {
+  var i = CmpSel.indexOf(id);
+  if (i>=0) CmpSel.splice(i,1); else if(CmpSel.length<4) CmpSel.push(id);
+  renderCmpChips();
+  renderCmpCards();
+}
+function renderCmpCards() {
+  var sel = CmpSel.length ? D.filter(function(d){return CmpSel.indexOf(d.id)>=0;}) : D.filter(function(d){return d.grade==='S'||d.grade==='A';}).slice(0,4);
+  document.getElementById('cmpCards').innerHTML = sel.map(function(d) {
+    var p = gPrice(d.후불형), goods=[], bads=[];
+    if (p>0&&p<15000) bads.push('가격 더 저렴 → 경쟁 우려');
+    else if (p>17000) goods.push('가격 비쌈 → 메뉴잇 유리');
+    if (d.해지&&d.해지.indexOf('100%')>=0) goods.push('위약금 100% → 메뉴잇 25% 유리');
+    if (d.프로모션&&d.프로모션.length>10) bads.push('파격 프로모션 주의');
+    var tone = bads.length>goods.length?'bad':goods.length>0?'good':'mix';
+    return '<div class="cmp-card">'
+      + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'+gBadge(d.grade)+'<strong style="font-size:14px">'+d.c+'</strong><span style="font-size:13px;font-weight:700;color:var(--or);margin-left:auto">'+(d.후불형||'-')+'</span></div>'
+      + [['해지위약금',d.해지],['AS',d.AS],['콜센터',d.콜센터],['재약정',d.재약정],['약정',d.약정]].map(function(r){return '<div class="cmp-row"><span class="ck">'+r[0]+'</span><span class="cv">'+(r[1]||'-')+'</span></div>';}).join('')
+      + '<div class="cmp-row"><span class="ck">기능수</span><span class="cv" style="color:var(--M)">'+(d.기능수||Object.keys(d.features||{}).length)+'개</span></div>'
+      + '<div class="vsbox '+tone+'"><div style="font-weight:700;font-size:10px;margin-bottom:3px">'+(tone==='good'?'✅ 메뉴잇 유리':tone==='bad'?'⚠️ 경쟁 주의':'💡 혼합')+'</div>'
+      + goods.map(function(g){return'<div>✅ '+g+'</div>';}).join('')
+      + bads.map(function(b){return'<div>⚠️ '+b+'</div>';}).join('')
+      + '</div></div>';
+  }).join('');
+}
+
+// 전화상담
+function renderCallList() {
+  document.getElementById('callList').innerHTML = D.map(function(d) {
+    return '<div class="co-sel-item'+(callId===d.id?' on':'')+'" data-id="'+d.id+'" onclick="selCall(this.dataset.id)">'
+      + gBadge(d.grade) + '<div><div style="font-weight:600;font-size:12px">'+d.c+(needsRenew(d)?'<span class="updt-dot"></span>':'')+'</div>'
+      + '<div style="font-size:10px;color:var(--t3)">'+(d.callDate||'미통화')+'</div></div></div>';
+  }).join('');
+}
+
+var CALL_ROWS = [
+  {k:'후불형', q:'후결형 월 이용료', s:'"3년 약정 기준 한 달에 대당 얼마씩 나오나요?"'},
+  {k:'선불형', q:'선결형 월 이용료', s:'"선납하면 얼마인가요?"'},
+  {k:'해지', q:'해지 위약금', s:'"중간에 해지하면 위약금이 어떻게 되나요?"'},
+  {k:'AS', q:'장비 AS (파손 시)', s:'"태블릿 파손됐을 때 AS는 어떻게 되나요?"'},
+  {k:'콜센터', q:'콜센터 운영 시간', s:'"야간에도 콜센터 연결이 되나요?"'},
+  {k:'재약정', q:'재약정 프로그램 사용비', s:'"약정 만료 후 계속 쓰면 비용이 어떻게 되나요?"'},
+  {k:'프로모션', q:'현재 진행 프로모션', s:'"지금 진행 중인 이벤트나 혜택이 있나요?"', type:'textarea'},
+  {k:'VAN', q:'VAN 결제 방식', s:'"VAN사가 어떻게 되나요?"'},
+  {k:'연동포스', q:'연동 가능 포스', s:'"어떤 포스들과 연동이 되나요?"', type:'textarea'},
+];
+
+function selCall(id) {
+  callId = id;
+  renderCallList();
+  var d = D.find(function(x){ return x.id===id; });
+  var h = '<div class="cform"><h3>'+d.c+' 전화상담 '+(d.callDate?'<span style="font-size:10px;color:var(--t3)">마지막: '+d.callDate+'</span>':'')+'</h3>';
+  CALL_ROWS.forEach(function(r) {
+    var v = d[r.k]||'';
+    var inp = r.type==='textarea'
+      ? '<textarea class="cinput" id="cf_'+r.k+'" rows="2">'+v+'</textarea>'
+      : '<input class="cinput" id="cf_'+r.k+'" value="'+v.replace(/"/g,'&quot;')+'" placeholder="직접 입력">';
+    h += '<div class="crow"><div class="cq">'+r.q+'</div><div class="cs">'+r.s+'</div>'+inp+'</div>';
+  });
+  h += '<div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--bd)">';
+  var fi = 0;
+  Object.keys(FEAT_CATS).forEach(function(cat) {
+    h += '<div class="fcat-label">'+cat+'</div><div class="feat-grid">';
+    FEAT_CATS[cat].forEach(function(f) {
+      var v = (d.features||{})[f]||'';
+      h += '<label class="fci'+(v?' ck':'')+'" data-fi="'+fi+'"><input type="checkbox" id="fcb_'+fi+'" '+(v?'checked ':'')+' onchange="updFCI('+fi+')">'+f+'</label>';
+      fi++;
+    });
+    h += '</div>';
+  });
+  h += '</div>';
+  h += '<div class="crow" style="margin-top:10px"><div class="cq">상담 메모</div><textarea class="cinput" id="cf_callLog" rows="3">'+(d.callLog||'')+'</textarea></div>';
+  h += '</div>';
+  document.getElementById('callForm').innerHTML = h;
+}
+function updFCI(i) {
+  var cb = document.getElementById('fcb_'+i);
+  var el = document.querySelector('[data-fi="'+i+'"]');
+  if (el) el.classList.toggle('ck', cb.checked);
+}
+function saveCall() {
+  if (!callId) { toast('업체를 먼저 선택하세요','err'); return; }
+  var idx = D.findIndex(function(x){ return x.id===callId; });
+  CALL_ROWS.forEach(function(r) {
+    var e = document.getElementById('cf_'+r.k);
+    if (e) D[idx][r.k] = e.value.trim();
+  });
+  var allF = Object.values(FEAT_CATS).reduce(function(a,b){return a.concat(b);},[]);
+  var feats = {};
+  allF.forEach(function(f,i) {
+    var cb = document.getElementById('fcb_'+i);
+    if (cb && cb.checked) feats[f] = '가능';
+  });
+  D[idx].features = feats;
+  D[idx].기능수 = Object.keys(feats).length;
+  var cl2 = document.getElementById('cf_callLog');
+  if (cl2) D[idx].callLog = cl2.value;
+  D[idx].callDate = new Date().toLocaleDateString('ko-KR');
+  D[idx].확인날짜 = new Date().toISOString().slice(0,10).replace(/-/g,'.');
+  sv(); render(); renderStat(); renderCallList(); renderDash(); showAlerts();
+  toast(D[idx].c+' 저장 완료!','ok');
+}
+
+// 대시보드
+function renderDash() {
+  var sorted = D.map(function(d){return{c:d.c,val:gPrice(d.후불형),g:d.grade};}).filter(function(x){return x.val>0;}).sort(function(a,b){return a.val-b.val;});
+  var mx = Math.max.apply(null, sorted.map(function(s){return s.val;}).concat([1]));
+  document.getElementById('priceRank').innerHTML = sorted.map(function(s,i){
+    var c=s.g==='S'?'#7C3AED':s.g==='A'?'var(--or)':s.g==='B'?'#D69E2E':'#718096';
+    return '<div class="rrow"><div class="rn'+(i<3?' top':'')+'">'+( i+1)+'</div>'
+      +'<span style="flex:1;font-weight:600">'+s.c+'</span>'
+      +'<div class="bm" style="flex:2"><div class="bmf" style="width:'+Math.round(s.val/mx*100)+'%;background:'+c+'"></div></div>'
+      +'<span style="width:65px;text-align:right;font-weight:700;color:'+c+'">'+s.val.toLocaleString()+'원</span></div>';
+  }).join('');
+
+  var threats = D.slice().sort(function(a,b){return(b.위협도||0)-(a.위협도||0);}).slice(0,8);
+  document.getElementById('threatMeter').innerHTML = threats.map(function(d){
+    var p=d.위협도||20; var c=p>=80?'var(--err)':p>=60?'var(--or)':p>=40?'#D69E2E':'#718096';
+    return '<div class="rrow">'+gBadge(d.grade)+'<span style="flex:1;font-weight:600;margin-left:6px">'+d.c+'</span>'
+      +'<div class="bm" style="flex:2"><div class="bmf" style="width:'+p+'%;background:'+c+'"></div></div>'
+      +'<span style="width:35px;text-align:right;font-weight:700;color:'+c+'">'+p+'%</span></div>';
+  }).join('');
+
+  document.getElementById('mentBox').innerHTML = Object.keys(MENT).map(function(name){
+    var d = D.find(function(x){return x.c===name;});
+    if (!d) return '';
+    return '<div style="padding:10px 0;border-bottom:1px solid var(--bd)">'+gBadge(d.grade)
+      +' <strong style="font-size:12px;margin-left:4px">'+name+'</strong>'
+      +'<div style="font-size:11px;color:var(--t2);margin-top:4px;line-height:1.7">'+MENT[name]+'</div></div>';
+  }).join('');
+}
+
+// 상세
+function oDet(id) {
+  var d = D.find(function(x){return x.id===id;});if(!d)return;
+  var fc = d.기능수||Object.keys(d.features||{}).length;
+  document.getElementById('mDetBody').innerHTML =
+    '<div class="mh">'+gBadge(d.grade)+'<h2>'+d.c+'</h2>'
+    +'<button class="btn btn-white btn-sm" onclick="cl(\'mDet\')" style="margin-left:auto">닫기</button>'
+    +' <button class="btn btn-blue btn-sm" data-id="'+d.id+'" onclick="cl(\'mDet\');oEdit(this.dataset.id)">수정</button></div>'
+    +'<div class="co-grid" style="margin-bottom:12px">'
+    +[['판매방식',d.판매방식],['약정',d.약정],['후불형',d.후불형,'var(--or)'],['선불형',d.선불형],
+      ['해지',d.해지,d.해지&&d.해지.indexOf('100%')>=0?'var(--err)':''],['재약정',d.재약정],
+      ['AS',d.AS],['콜센터',d.콜센터],['포스비용',d.포스비용],['확인날짜',d.확인날짜]
+    ].map(function(r){return '<div class="co-item"><div class="k">'+r[0]+'</div><div class="v" style="color:'+(r[2]||'var(--t1)')+'">'+( r[1]||'-')+'</div></div>';}).join('')
+    +'</div>'
+    +'<div style="font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;margin-bottom:6px">기능 ('+fc+'개)</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">'+Object.keys(d.features||{}).map(function(k){return'<span class="tag" style="background:var(--M2);color:var(--M)">'+k+'</span>';}).join('')+'</div>'
+    +(d.프로모션?'<div style="background:#FFFFF0;border:1px solid #FAF089;border-radius:8px;padding:10px;font-size:12px;color:#744210;line-height:1.7;margin-bottom:8px"><strong style="display:block;margin-bottom:3px;font-size:10px">🎁 프로모션</strong>'+d.프로모션+'</div>':'')
+    +(d.memo?'<div style="background:#FFF5F5;border:1px solid #FEB2B2;border-radius:8px;padding:10px;font-size:12px;color:#9B2C2C;line-height:1.7"><strong style="display:block;margin-bottom:3px;font-size:10px">⚠️ 메모</strong>'+d.memo+'</div>':'')
+    +(d.callDate?'<div style="margin-top:8px;font-size:11px;color:var(--t3)">📞 마지막 통화: '+d.callDate+'</div>':'');
+  document.getElementById('mDet').style.display='flex';
+}
+
+// 추가/수정
+function oAdd() {
+  document.getElementById('mAddT').textContent='업체 추가'; document.getElementById('eid').value='';
+  ['fc','f판매방식','f약정','f후불형','f선불형','f해지','fAS','f콜센터','f확인날짜','f프로모션','fmemo'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  document.getElementById('fg').selectedIndex=2;
+  document.getElementById('mAdd').style.display='flex';
+}
+function oEdit(id) {
+  var d=D.find(function(x){return x.id===id;});if(!d)return;
+  document.getElementById('mAddT').textContent='업체 수정'; document.getElementById('eid').value=id;
+  var m={fc:'c',f판매방식:'판매방식',f약정:'약정',f후불형:'후불형',f선불형:'선불형',f해지:'해지',fAS:'AS',f콜센터:'콜센터',f확인날짜:'확인날짜',f프로모션:'프로모션',fmemo:'memo'};
+  Object.keys(m).forEach(function(eid){var e=document.getElementById(eid);if(e)e.value=d[m[eid]]||'';});
+  document.getElementById('fg').value=d.grade||'B';
+  document.getElementById('mAdd').style.display='flex';
+}
+function saveD() {
+  var name=document.getElementById('fc').value.trim(); if(!name){toast('업체명 입력 필요','err');return;}
+  var eid=document.getElementById('eid').value;
+  var obj={c:name,grade:document.getElementById('fg').value,판매방식:document.getElementById('f판매방식').value,약정:document.getElementById('f약정').value,후불형:document.getElementById('f후불형').value,선불형:document.getElementById('f선불형').value,해지:document.getElementById('f해지').value,AS:document.getElementById('fAS').value,콜센터:document.getElementById('f콜센터').value,확인날짜:document.getElementById('f확인날짜').value,프로모션:document.getElementById('f프로모션').value,memo:document.getElementById('fmemo').value};
+  if(eid){var i=D.findIndex(function(x){return x.id===eid;});D[i]=Object.assign({},D[i],obj);}
+  else{obj.id=name+'_'+Date.now();obj.features={};obj.기능수=0;obj.위협도=30;obj.callLog='';obj.callDate='';D.push(obj);}
+  sv();render();renderStat();renderCmpChips();renderDash();showAlerts();cl('mAdd');
+  toast(eid?'수정 완료!':'추가 완료!','ok');
+}
+function delD(id) {
+  if(!confirm('삭제하시겠습니까?'))return;
+  D=D.filter(function(x){return x.id!==id;});sv();render();renderStat();renderCmpChips();renderDash();toast('삭제 완료');
+}
+
+// AI
+function oAI(){document.getElementById('mAI').style.display='flex';}
+function sq(q){document.getElementById('aq').value=q;}
+async function runAI(){
+  var q=document.getElementById('aq').value.trim();if(!q)return;
+  var btn=document.getElementById('aibtn'),res=document.getElementById('ar');
+  btn.innerHTML='<span class="spin"></span> 분석 중...';btn.disabled=true;res.style.display='block';res.textContent='';
+  var ctx=D.map(function(d){return d.c+'('+d.grade+'): 후불형='+d.후불형+'|해지='+d.해지+'|AS='+d.AS+'|콜센터='+d.콜센터+'|기능수='+(d.기능수||0);}).join('\n');
+  try{
+    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,system:'메뉴잇 영업팀 경쟁사 분석 AI.\n경쟁사:\n'+ctx+'\n\n메뉴잇: 자체렌탈·해지25%+할인반환금·연동포스 실시간(이지/오케이)+에이전트20개이상·VAN(KICC/KIS/NICE)·메뉴잇포스.\n실용적 한국어 답변.',messages:[{role:'user',content:q}]})});
+    var j=await r.json();res.textContent=j.content?.[0]?.text||'응답 없음';
+  }catch(e){res.textContent='오류: '+e.message;}
+  btn.innerHTML='<i class="ti ti-send"></i> 분석 시작';btn.disabled=false;
+}
+
+// 엑셀 다운로드
+function dlExcel(){
+  var wb=XLSX.utils.book_new();
+  var today=new Date().toISOString().slice(0,10).replace(/-/g,'.');
+  var allF=Object.values(FEAT_CATS).reduce(function(a,b){return a.concat(b);},[]);
+  var MFEATS={'자리이동':'가능','합석':'가능','영수증 재출력':'가능','배달 연동':'푸드테크 추가','더치페이':'가능','ASP':'웹 연동','로봇연동':'배민','뷰가드 연동':'캡스','오더포스 모드':'가능','KDS 모드':'가능','웨이팅':'가능(무상)','포인트':'가능','후불형/선불형 변경':'가능','전원 off':'가능','화면켜기':'가능','원격 재부팅':'가능','원격 업데이트':'가능','메뉴 사진수정':'가능','메뉴 금액 수정':'가능','판매시간 설정':'가능','품절':'가능','숨김':'가능','옵션':'가능','맵기표시':'가능','신메뉴 표시':'가능','로고 변경':'가능','대기페이지 변경':'가능','테마 변경':'화이트/블랙','다국어':'한/중/일/영','픽업메세지':'가능','브레이크':'가능','영업마감':'가능','태블릿 배터리 잔여표시':'가능'};
+
+  // 시트1: 최신화
+  var header=[0,'메뉴잇'].concat(D.map(function(d){return d.c;}));
+  var pRows=[
+    ['확인날짜',today].concat(D.map(function(d){return d.확인날짜||today;})),
+    ['판매방식','/'].concat(D.map(function(d){return d.판매방식||'/';})),
+    ['프로모션','8월 프로모션 변경 예정'].concat(D.map(function(d){return d.프로모션||'/';})),
+    ['약정개월','3년'].concat(D.map(function(d){return d.약정||'/';})),
+    ['재약정','/'].concat(D.map(function(d){return d.재약정||'/';})),
+    ['소유권','/'].concat(D.map(function(d){return d.소유권||'/';})),
+    ['해지','/'].concat(D.map(function(d){return d.해지||'/';})),
+    ['포스비용','/'].concat(D.map(function(d){return d.포스비용||'/';})),
+    ['후불형','/'].concat(D.map(function(d){return d.후불형||'/';})),
+    ['선불형','/'].concat(D.map(function(d){return d.선불형||'/';})),
+    ['AS','/'].concat(D.map(function(d){return d.AS||'/';})),
+    ['콜센터','내부 운영 기준'].concat(D.map(function(d){return d.콜센터||'/';})),
+    ['자사 포스','메뉴잇 포스'].concat(D.map(function(d){return d.자사포스||'X';})),
+    ['VAN','KICC, KIS, NICE'].concat(D.map(function(d){return d.VAN||'/';})),
+    ['연동포스','실시간+에이전트20개이상'].concat(D.map(function(d){return d.연동포스||'/';})),
+  ];
+  allF.forEach(function(f){pRows.push([f,MFEATS[f]||'X'].concat(D.map(function(d){return(d.features||{})[f]||'';})));});
+  var ws1=XLSX.utils.aoa_to_sheet([header].concat(pRows));
+  ws1['!cols']=[{wch:22},{wch:18}].concat(D.map(function(){return{wch:16};}));
+  XLSX.utils.book_append_sheet(wb,ws1,'최신화_'+today.replace(/\./g,''));
+
+  // 시트2: 경쟁사 정책
+  var rows2=[[''].concat(['메뉴잇'].concat(D.map(function(d){return d.c;})))].concat(pRows.slice(0,15));
+  var ws2=XLSX.utils.aoa_to_sheet(rows2);
+  ws2['!cols']=[{wch:16},{wch:16}].concat(D.map(function(){return{wch:16};}));
+  XLSX.utils.book_append_sheet(wb,ws2,'경쟁사 정책');
+
+  // 시트3: 경쟁사 기능
+  var rows3=[[''].concat(['메뉴잇'].concat(D.map(function(d){return d.c;}))),['갱신월',today.slice(0,7)].concat(D.map(function(d){return(d.확인날짜||today).slice(0,7);}))];
+  allF.forEach(function(f){rows3.push([f,MFEATS[f]||'X'].concat(D.map(function(d){return(d.features||{})[f]||'';})));});
+  var ws3=XLSX.utils.aoa_to_sheet(rows3);
+  ws3['!cols']=[{wch:22},{wch:16}].concat(D.map(function(){return{wch:14};}));
+  XLSX.utils.book_append_sheet(wb,ws3,'경쟁사 기능');
+
+  // 시트4: 업체별 분석
+  var rows4=[['업체','가격 그래프','경쟁강도 그래프','핵심 메모','자료','업데이트'],['메뉴잇','','■□□□□□□□□□','정책 미확정','','8월 프로모션 변경 예정']];
+  D.forEach(function(d){
+    var p=gPrice(d.후불형);var pb='■'.repeat(Math.round(p/27000*10))+'□'.repeat(10-Math.round(p/27000*10));
+    var tb='■'.repeat(Math.round((d.위협도||30)/100*10))+'□'.repeat(10-Math.round((d.위협도||30)/100*10));
+    rows4.push([d.c,pb,tb,d.memo||'','','']);
+  });
+  var ws4=XLSX.utils.aoa_to_sheet(rows4);
+  ws4['!cols']=[{wch:14},{wch:14},{wch:14},{wch:30},{wch:10},{wch:25}];
+  XLSX.utils.book_append_sheet(wb,ws4,'업체별 분석');
+
+  // 시트5: 전화상담 기록
+  var rows5=[['업체명','등급','마지막통화','후불형','해지','AS','콜센터','프로모션','기능수','메모']];
+  D.forEach(function(d){rows5.push([d.c,d.grade,d.callDate||'미통화',d.후불형||'',d.해지||'',d.AS||'',d.콜센터||'',d.프로모션||'',d.기능수||0,d.callLog||'']);});
+  var ws5=XLSX.utils.aoa_to_sheet(rows5);
+  ws5['!cols']=[{wch:14},{wch:6},{wch:12},{wch:12},{wch:20},{wch:16},{wch:20},{wch:40},{wch:6},{wch:40}];
+  XLSX.utils.book_append_sheet(wb,ws5,'전화상담 기록');
+
+  XLSX.writeFile(wb,'메뉴잇_경쟁사비교_'+today+'.xlsx');
+  toast('엑셀 다운로드 완료! (5시트)','ok');
+}
+
+function dlPDF(){
+  var today=new Date().toLocaleDateString('ko-KR');
+  var w=window.open('','_blank');
+  var gc={S:'#7C3AED',A:'#DD6B20',B:'#D69E2E',C:'#3182CE',D:'#718096'};
+  var rows=D.map(function(d){return'<tr><td><strong>'+d.c+'</strong></td><td><span style="background:'+(gc[d.grade]||'#888')+';color:#fff;padding:1px 5px;border-radius:3px;font-size:9px">'+d.grade+'</span></td><td>'+( d.후불형||'-')+'</td><td>'+((d.해지||'-').substring(0,14))+'</td><td>'+(d.AS||'-')+'</td><td>'+((d.콜센터||'-').substring(0,14))+'</td></tr>';}).join('');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>메뉴잇 경쟁사</title><style>body{font-family:sans-serif;padding:20px;font-size:11px}h1{font-size:16px;margin-bottom:8px}table{width:100%;border-collapse:collapse}th{background:#1A202C;color:#fff;padding:5px 8px;text-align:left;font-size:10px}td{padding:5px 8px;border-bottom:1px solid #EDF2F7}@media print{body{padding:10px}}</style></head><body><h1>메뉴잇 경쟁사 보고서</h1><p style="color:#718096;font-size:10px;margin-bottom:12px">'+today+' · '+D.length+'개 업체</p><table><thead><tr><th>업체명</th><th>등급</th><th>후불형</th><th>해지위약금</th><th>AS</th><th>콜센터</th></tr></thead><tbody>'+rows+'</tbody></table><script>window.onload=function(){window.print();};<\/script></body></html>');
+  w.document.close();
+  toast('PDF 준비 완료','ok');
+}
+
+function toast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+(type==='ok'?'ok':type==='err'?'err':'');setTimeout(function(){t.classList.remove('show');},3000);}
+function cl(id){document.getElementById(id).style.display='none';}
+init();
+</script>
+</body>
+</html>
